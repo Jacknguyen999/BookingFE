@@ -1,11 +1,9 @@
-import React, {Component} from "react";
-import {Navigate, NavLink, useLocation} from "react-router-dom";
+import React from "react";
+import {Navigate, useLocation} from "react-router-dom";
 import ApiService from "./ApiService";
 
 
-
-
-export const Route = ({element : Component}) => {
+export const CustomerRoute = ({element: Component}) => {
     const location = useLocation();
 
     return ApiService.isAuthenticated() ? (
@@ -16,7 +14,7 @@ export const Route = ({element : Component}) => {
 
 }
 
-export const AdminRoute = ({element : Component}) => {
+export const AdminRoute = ({element: Component}) => {
     const location = useLocation();
     return ApiService.isAdmin() ? (
         Component

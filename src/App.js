@@ -5,6 +5,8 @@ import Footer from "./Component/common/footer";
 import Homepage from "./Component/Home/homepage";
 import SignIn from "./Component/auth/SignIn";
 import SignUp from "./Component/auth/SignUp";
+import {CustomerRoute} from "./Config/Authen";
+import ProfilePage from "./Component/profile/ProfilePage";
 
 function Layout() {
     const location = useLocation();
@@ -13,21 +15,25 @@ function Layout() {
     return (
         <div className="App">
             {/* Conditionally render Navbar and Footer */}
-            {!isAuthPage && <Navbar />}
+            {!isAuthPage && <Navbar/>}
             <div className="content">
                 <Routes>
                     {/* Public Routes */}
-                    <Route exact path="/home" element={<Homepage />} />
-                    <Route exact path="/login" element={<SignIn />} />
+                    <Route exact path="/home" element={<Homepage/>}/>
+                    <Route exact path="/login" element={<SignIn/>}/>
                     {/* Add Register route here if necessary */}
-                     <Route exact path="/register" element={<SignUp />} />
+                    <Route path="/register" element={<SignUp/>}/>
+
+
+                    {/* Protected Routes */}
+                    <Route path="/profile" element={<CustomerRoute element={<ProfilePage/>}/>}/>
 
                     {/* Fallback Route */}
-                    <Route path="*" element={<Navigate to="/login" />} />
+                    <Route path="*" element={<Navigate to="/login"/>}/>
                 </Routes>
             </div>
             {/* Conditionally render Footer */}
-            {!isAuthPage && <Footer />}
+            {!isAuthPage && <Footer/>}
         </div>
     );
 }
@@ -35,7 +41,7 @@ function Layout() {
 function App() {
     return (
         <BrowserRouter>
-            <Layout />
+            <Layout/>
         </BrowserRouter>
     );
 }

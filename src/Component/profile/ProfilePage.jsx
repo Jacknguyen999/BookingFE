@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import ApiService from "../../Config/ApiService";
 
@@ -7,6 +7,25 @@ const ProfilePage = () => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const response = await ApiService.getCurrentUser();
+                console.log("Response", response);
+
+                const userPlusBooking = await ApiService.getUserBooking(response.user.id);
+                setUser(userPlusBooking.user)
+            } catch (error) {
+                setError(error.response?.data?.message || error.message);
+            }
+        }
+
+
+        fetchUserProfile();
+
+    }, []);
+
 
     const handleEditProfile = () => {
         navigate('/edit-profile');
@@ -38,9 +57,23 @@ const ProfilePage = () => {
             <div className='bookings-section'>
                 <h3>My Booking History </h3>
                 <div className='booking-list'>
-                    {/*{user && user.bookings.length >0 ? (*/}
-                    {/*    */}
-                    {/*)}*/}
+                    {user && user.bookings.length > 0 ? (
+                            user.bookings.map((booking) => (
+                                <div key={booking.id} className='booking-item'>
+                                    <p><strong>Booking Code:</strong> {booking.bookingConfirmationCode}</p>
+                                    <p><strong>Check-in Date:</strong> {booking.checkInDate}</p>
+                                    <p><strong>Check-out Date:</strong> {booking.checkOutDate}</p>
+                                    <p><strong>Total Guests:</strong> {booking.totalNumOfGuest}</p>
+                                    <p><strong>Room Type:</strong> {booking.room.roomType}</p>
+                                    <img src={booking.room.roomPhotoUrl} alt="Room" className="room-photo"/>
+
+                                </div>
+                            ))
+                        ) :
+                        (
+                            <p>No Booking found.</p>
+                        )
+                    }
                 </div>
 
             </div>
