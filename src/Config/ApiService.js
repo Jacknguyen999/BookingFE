@@ -3,7 +3,7 @@ import axios from "axios";
 export default class ApiService {
     static BASE_URL = "http://localhost:8484";
 
-    static getHeader(){
+    static getHeader() {
         const token = localStorage.getItem("token");
         return {
             Authorization: `Bearer ${token}`,
@@ -51,7 +51,7 @@ export default class ApiService {
 
     // get user booking
     static async getUserBooking(userId) {
-        const response = await axios.get(`${this.BASE_URL}/users/get_user_booking/${userId}`,{
+        const response = await axios.get(`${this.BASE_URL}/users/get_user_booking/${userId}`, {
             headers: this.getHeader()
         })
         return response.data;
@@ -69,7 +69,7 @@ export default class ApiService {
 
     /* add a new room */
     static async addRoom(formData) {
-        const result = await axios.post(`${this.BASE_URL}/rooms/add`, formData, {
+        const result = await axios.post(`${this.BASE_URL}/room/add`, formData, {
             headers: {
                 ...this.getHeader(),
                 'Content-Type': 'multipart/form-data'
@@ -85,36 +85,36 @@ export default class ApiService {
 
     static async getAvailableRoomsByDateAndType(checkInDate, checkOutDate, roomType) {
         const result = await axios.get(
-            `${this.BASE_URL}/rooms/available-rooms-by-date-and-type?checkInDate=${checkInDate}
+            `${this.BASE_URL}/room/available-rooms-by-date-and-type?checkInDate=${checkInDate}
 		&checkOutDate=${checkOutDate}&roomType=${roomType}`
         )
         return result.data
     }
 
     static async getRoomTypes() {
-        const response = await axios.get(`${this.BASE_URL}/rooms/types`)
+        const response = await axios.get(`${this.BASE_URL}/room/types`)
         return response.data
     }
 
     static async getAllRooms() {
-        const result = await axios.get(`${this.BASE_URL}/rooms/all`)
+        const result = await axios.get(`${this.BASE_URL}/room/all`)
         return result.data
     }
 
     static async getRoomById(roomId) {
-        const result = await axios.get(`${this.BASE_URL}/rooms/room-by-id/${roomId}`)
+        const result = await axios.get(`${this.BASE_URL}/room/room-by-id/${roomId}`)
         return result.data
     }
 
     static async deleteRoom(roomId) {
-        const result = await axios.delete(`${this.BASE_URL}/rooms/delete/${roomId}`, {
+        const result = await axios.delete(`${this.BASE_URL}/room/delete/${roomId}`, {
             headers: this.getHeader()
         })
         return result.data
     }
 
     static async updateRoom(roomId, formData) {
-        const result = await axios.put(`${this.BASE_URL}/rooms/update/${roomId}`, formData, {
+        const result = await axios.put(`${this.BASE_URL}/room/update/${roomId}`, formData, {
             headers: {
                 ...this.getHeader(),
                 'Content-Type': 'multipart/form-data'

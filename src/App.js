@@ -7,6 +7,8 @@ import SignIn from "./Component/auth/SignIn";
 import SignUp from "./Component/auth/SignUp";
 import {CustomerRoute} from "./Config/Authen";
 import ProfilePage from "./Component/profile/ProfilePage";
+import EditProfilePage from "./Component/profile/EditProfilePage";
+import AllRoomPage from "./Component/booking_rooms/AllRoomPage";
 
 function Layout() {
     const location = useLocation();
@@ -21,12 +23,14 @@ function Layout() {
                     {/* Public Routes */}
                     <Route exact path="/home" element={<Homepage/>}/>
                     <Route exact path="/login" element={<SignIn/>}/>
-                    {/* Add Register route here if necessary */}
                     <Route path="/register" element={<SignUp/>}/>
+                    <Route path="/rooms" element={<AllRoomPage/>}/>
 
 
                     {/* Protected Routes */}
                     <Route path="/profile" element={<CustomerRoute element={<ProfilePage/>}/>}/>
+
+                    <Route path="/edit-profile" element={<CustomerRoute element={<EditProfilePage/>}/>}/>
 
                     {/* Fallback Route */}
                     <Route path="*" element={<Navigate to="/login"/>}/>

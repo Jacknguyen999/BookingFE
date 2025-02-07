@@ -18,13 +18,11 @@ const Homepage = () => {
             {/* HEADER / BANNER ROOM SECTION */}
             <section>
                 <header className="header-banner">
-                    <img src='/assets/images/hotel.webp' alt="Phegon Hotel" className="header-image"/>
-                    <div className="overlay"></div>
-                    <div className="animated-texts overlay-content">
-                        <h1>
-                            Welcome to <span className="phegon-color">Thomas Hotel</span>
-                        </h1><br/>
-                        <h3>Step into a haven of comfort and care</h3>
+                    <div className="overlay">
+                        <div className="overlay-content">
+                            <h1>Welcome to <span className="phegon-color">Thomas Hotel</span></h1>
+                            <h3>Step into a haven of comfort and care</h3>
+                        </div>
                     </div>
                 </header>
             </section>

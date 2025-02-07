@@ -4,8 +4,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import ApiService from "../../Config/ApiService";
 
 
-
-
 const RoomSearch = ({handleSearchResult}) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -14,12 +12,9 @@ const RoomSearch = ({handleSearchResult}) => {
     const [roomTypes, setRoomTypes] = useState([]);
 
 
-
-
-
     useEffect(() => {
         const fetchRoomsTypes = async () => {
-            try{
+            try {
                 const types = await ApiService.getRoomTypes();
                 setRoomTypes(types);
             } catch (error) {
@@ -30,31 +25,35 @@ const RoomSearch = ({handleSearchResult}) => {
     }, []);
 
 
-    const showError = (message,timeout = 5000) =>{
+    const showError = (message, timeout = 5000) => {
 
         setError(message);
         setTimeout(() => {
             setError('');
-        },timeout);
+        }, timeout);
 
     }
 
 
-    const handleInternalSearch = async () =>{
-        if(!startDate || !endDate || !roomType){
+    const handleInternalSearch = async () => {
+        if (!startDate || !endDate || !roomType) {
             showError("Please enter a valid infor");
             return false;
         }
-        try{
+        try {
 
-            const formattedStartDate = startDate? startDate.toISOString().split('T')[0] : null;
-            const formattedEndDate = endDate? endDate.toISOString().split('T')[0] : null;
+            const formattedStartDate = startDate ? startDate.toISOString().split('T')[0] : null;
+            const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
 
-            const response = await ApiService.getAvailableRoomsByDateAndType(formattedStartDate, formattedEndDate,roomType);
-            if (response.status === 200){
-                if(response.roomList.length === 0){
+            const response = await ApiService.getAvailableRoomsByDateAndType(formattedStartDate, formattedEndDate, roomType);
+
+            console.log(
+                "Response room list : ", response
+            )
+            if (response.statusCode === 200) {
+                if (response.roomList.length === 0) {
                     showError("No available rooms");
-                    return ;
+                    return;
                 }
                 handleSearchResult(response.roomList);
                 setError('')
@@ -66,16 +65,16 @@ const RoomSearch = ({handleSearchResult}) => {
     }
 
 
-    return(
+    return (
         <section>
             <div className='search-container'>
                 <div className='search-field'>
                     <label>Check-in Date</label>
                     <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    dateFormat="dd/MM/yyyy"
-                    placeholderText="Select Check-in Date"
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        dateFormat="dd/MM/yyyy"
+                        placeholderText="Select Check-in Date"
                     />
                 </div>
                 <div className='search-field'>
@@ -85,31 +84,31 @@ const RoomSearch = ({handleSearchResult}) => {
                         onChange={(date) => setEndDate(date)}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="Select Check-out Date"
-                     />
+                    />
 
                 </div>
 
                 <div className='search-field'>
                     <label>Room Type </label>
-                   <select value={roomType} onChange={(e) => setRoomType(e.target.value)}>
-                       <option disabled value="">
-                           Select Room Type
-                       </option>
-                       {roomTypes.map((roomType) => (
-                           <option key={roomType} value={roomType}>
-                               {roomType}
-                           </option>
-                       ))}
-                   </select>
+                    <select value={roomType} onChange={(e) => setRoomType(e.target.value)}>
+                        <option disabled value="">
+                            Select Room Type
+                        </option>
+                        {roomTypes.map((roomType) => (
+                            <option key={roomType} value={roomType}>
+                                {roomType}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <button className="home-search-button" onClick={handleInternalSearch}>
                     Search Rooms
                 </button>
             </div>
-            {error && <p className ="error-message"> {error}</p>}
+            {error && <p className="error-message"> {error}</p>}
         </section>
     )
 
 }
 
-export  default RoomSearch;
+export default RoomSearch;

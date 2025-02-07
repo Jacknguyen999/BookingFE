@@ -20,8 +20,6 @@ const ProfilePage = () => {
                 setError(error.response?.data?.message || error.message);
             }
         }
-
-
         fetchUserProfile();
 
     }, []);
