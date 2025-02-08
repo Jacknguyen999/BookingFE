@@ -15,7 +15,7 @@ const AddRoomPage = () => {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
     const [error, setError] = useState('');
-    const [success, setSucess] = useState('');
+    const [success, setSuccess] = useState('');
     const [roomTypes, setRoomTypes] = useState([]);
     const [newRoomType, setNewRoomType] = useState(false);
 
@@ -42,10 +42,10 @@ const AddRoomPage = () => {
 
     const handleRoomTypeChange = (e) => {
         if (e.target.value === 'new') {
-            setRoomTypes(true);
+            setNewRoomType(true);
             setRoomDetails(prevState => ({...prevState, roomType: ''}));
         } else {
-            setRoomTypes(false);
+            setNewRoomType(false);
             setRoomDetails(prevState => ({...prevState, roomType: e.target.value}))
         }
 
@@ -60,6 +60,45 @@ const AddRoomPage = () => {
             setFile(null);
             setPreview(null);
         }
+    }
+
+    // add new room
+
+    const addRoom = async () => {
+        if (!roomDetails.roomType || !roomDetails.roomPrice || !roomDetails.roomDescription) {
+            setError('All room details must be provided.');
+            setTimeout(() => setError(''), 5000);
+            return;
+        }
+
+        if (!window.confirm('Do you want to add this room?')) {
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('roomType', roomDetails.roomType);
+            formData.append('roomPrice', roomDetails.roomPrice);
+            formData.append('roomDescription', roomDetails.roomDescription);
+
+            if (file) {
+                formData.append('photo', file);
+            }
+            const result = await ApiService.addRoom(formData);
+            if (result.statusCode === 200) {
+                setSuccess('Room Added successfully.');
+
+                setTimeout(() => {
+                    setSuccess('');
+                    navigate('/admin/manage-rooms');
+                }, 3000);
+            }
+        } catch (error) {
+            setError(error.response?.data?.message || error.message);
+            setTimeout(() => setError(''), 5000);
+        }
+
+
     }
     return (
         <div className='edit-room-container'>
@@ -106,6 +145,18 @@ const AddRoomPage = () => {
                     />
 
                 </div>
+                <div className='form-group'>
+                    <label>Room Description</label>
+                    <input
+                        type="text"
+                        name='roomDescription'
+                        value={roomDetails.roomDescription}
+                        onChange={handleChange}
+                    />
+
+                </div>
+
+                <button className='update-button' onClick={addRoom}> Add Room</button>
 
             </div>
 
@@ -113,3 +164,4 @@ const AddRoomPage = () => {
     )
 
 }
+export default AddRoomPage;
