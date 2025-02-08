@@ -52,7 +52,7 @@ const AddRoomPage = () => {
     }
 
     const handleFileChange = (e) => {
-        const selectedFile = e.target.file[0];
+        const selectedFile = e.target.files[0];
         if (selectedFile) {
             setFile(selectedFile);
             setPreview(URL.createObjectURL(selectedFile));
