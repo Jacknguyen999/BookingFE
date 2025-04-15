@@ -1,59 +1,65 @@
-# Booking Frontend Application
+# 🏨 Booking Frontend Application
 
-A modern React-based frontend application for managing room bookings and reservations.
+A modern, responsive web application built with React for managing room bookings and reservations. Designed with user experience and scalability in mind.
 
-## Features
+---
 
-- User Authentication (Sign In/Sign Up)
-- Role-based Access Control (Admin/Customer)
-- Room Management
-  - View all rooms
-  - Room details
-  - Room booking
-  - Find bookings
-- Profile Management
-  - View profile
-  - Edit profile
-- Admin Features
-  - Manage rooms (Add/Edit/Delete)
-  - Manage bookings
-  - Admin dashboard
+## 🚀 Features
 
-## Tech Stack
+### 👤 Authentication & Authorization
+- Sign In / Sign Up
+- Role-based access control: **Admin** & **Customer**
 
-- React 18
-- React Router v7
-- Redux + Redux Thunk
-- Material UI v6
-- Formik
-- Axios
-- Tailwind CSS
-- WebSocket (STOMP/SockJS)
-- React DatePicker
+### 🏠 Room Management
+- Browse all rooms
+- View detailed room information
+- Book rooms with date picker
+- Search and view bookings
 
-## Getting Started
+### 🧑‍💼 User Profile
+- View personal profile
+- Edit profile details
+
+### 🛠️ Admin Capabilities
+- Admin dashboard
+- Add / Edit / Delete rooms
+- Manage all bookings
+
+---
+
+## 🛠 Tech Stack
+
+- **Frontend Framework**: React 18
+- **Routing**: React Router v7
+- **State Management**: Redux + Redux Thunk
+- **UI Libraries**: Material UI v6, Tailwind CSS
+- **Form Handling**: Formik
+- **HTTP Requests**: Axios
+- **Real-Time Communication**: WebSocket (STOMP over SockJS)
+- **Date Picker**: React DatePicker
+
+---
+
+## ⚙️ Getting Started
 
 ### Prerequisites
-
-- Node.js (latest LTS version)
+- Node.js (Latest LTS version)
 - npm or yarn
 
 ### Installation
 
-1. Clone the repository
-```bash
+
+# 1. Clone the repository
 git clone [your-repo-url]
-```
 
-2. Install dependencies
-```bash
+# 2. Navigate to the project folder
+cd booking-frontend
+
+# 3. Install dependencies
 npm install
-```
 
-3. Start the development server
-```bash
+# 4. Start the development server
 npm start
-```
 
 The application will be available at `http://localhost:3000`
 
@@ -65,7 +71,7 @@ The application will be available at `http://localhost:3000`
 - `npm run eject` - Ejects from Create React App
 
 ## Project Structure
-
+```bash
 src/
 ├── Component/
 │ ├── admin/ # Admin-specific components
