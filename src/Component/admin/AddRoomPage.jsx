@@ -2,18 +2,16 @@ import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import ApiService from "../../Config/ApiService";
 
-
 const AddRoomPage = () => {
     const navigate = useNavigate();
     const [roomDetails, setRoomDetails] = useState({
-        roomImageUrl: '',
         roomType: '',
         roomPrice: '',
         roomDescription: '',
-    })
+    });
 
-    const [file, setFile] = useState(null);
-    const [preview, setPreview] = useState(null);
+    const [files, setFiles] = useState([]);
+    const [previews, setPreviews] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [roomTypes, setRoomTypes] = useState([]);
@@ -33,11 +31,10 @@ const AddRoomPage = () => {
 
     const handleChange = (e) => {
         const {name, value} = e.target;
-
         setRoomDetails(prevState => ({
             ...prevState,
             [name]: value,
-        }))
+        }));
     };
 
     const handleRoomTypeChange = (e) => {
@@ -46,23 +43,34 @@ const AddRoomPage = () => {
             setRoomDetails(prevState => ({...prevState, roomType: ''}));
         } else {
             setNewRoomType(false);
-            setRoomDetails(prevState => ({...prevState, roomType: e.target.value}))
+            setRoomDetails(prevState => ({...prevState, roomType: e.target.value}));
         }
-
-    }
+    };
 
     const handleFileChange = (e) => {
-        const selectedFile = e.target.files[0];
-        if (selectedFile) {
-            setFile(selectedFile);
-            setPreview(URL.createObjectURL(selectedFile));
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length > 0) {
+            setFiles(selectedFiles);
+            
+            // Create preview URLs for all selected files
+            const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+            
+            // Clean up old preview URLs to prevent memory leaks
+            previews.forEach(preview => URL.revokeObjectURL(preview));
+            
+            setPreviews(newPreviews);
         } else {
-            setFile(null);
-            setPreview(null);
+            setFiles([]);
+            setPreviews([]);
         }
-    }
+    };
 
-    // add new room
+    // Cleanup preview URLs when component unmounts
+    useEffect(() => {
+        return () => {
+            previews.forEach(preview => URL.revokeObjectURL(preview));
+        };
+    }, [previews]);
 
     const addRoom = async () => {
         if (!roomDetails.roomType || !roomDetails.roomPrice || !roomDetails.roomDescription) {
@@ -81,9 +89,11 @@ const AddRoomPage = () => {
             formData.append('roomPrice', roomDetails.roomPrice);
             formData.append('roomDescription', roomDetails.roomDescription);
 
-            if (file) {
-                formData.append('photo', file);
-            }
+            // Append all selected files
+            files.forEach((file, index) => {
+                formData.append('photos', file);
+            });
+
             const result = await ApiService.addRoom(formData);
             if (result.statusCode === 200) {
                 setSuccess('Room Added successfully.');
@@ -97,9 +107,8 @@ const AddRoomPage = () => {
             setError(error.response?.data?.message || error.message);
             setTimeout(() => setError(''), 5000);
         }
+    };
 
-
-    }
     return (
         <div className='edit-room-container'>
             <h2>Add new Room</h2>
@@ -107,19 +116,28 @@ const AddRoomPage = () => {
             {success && <p className='success-message'>{success}</p>}
             <div className='edit-room-form'>
                 <div className='form-group'>
-                    {preview && (
-                        <img src={preview} alt="Room Preview" className='room-photo-preview'/>
-                    )}
+                    <div className="preview-container">
+                        {previews.map((preview, index) => (
+                            <img 
+                                key={index}
+                                src={preview} 
+                                alt={`Room Preview ${index + 1}`} 
+                                className='room-photo-preview'
+                            />
+                        ))}
+                    </div>
                     <input
                         type='file'
-                        name='roomPhoto'
+                        name='roomPhotos'
                         onChange={handleFileChange}
+                        multiple // Enable multiple file selection
+                        accept="image/*" // Accept only image files
                     />
                 </div>
                 <div className='form-group'>
                     <label>Room Type</label>
                     <select value={roomDetails.roomType} onChange={handleRoomTypeChange}>
-                        <option>Select a room type</option>
+                        <option value="">Select a room type</option>
                         {roomTypes.map(type => (
                             <option key={type} value={type}>{type}</option>
                         ))}
@@ -138,30 +156,25 @@ const AddRoomPage = () => {
                 <div className='form-group'>
                     <label>Room Price</label>
                     <input
-                        type="text"
+                        type="number"
                         name='roomPrice'
                         value={roomDetails.roomPrice}
                         onChange={handleChange}
                     />
-
                 </div>
                 <div className='form-group'>
                     <label>Room Description</label>
-                    <input
-                        type="text"
+                    <textarea
                         name='roomDescription'
                         value={roomDetails.roomDescription}
                         onChange={handleChange}
                     />
-
                 </div>
 
-                <button className='update-button' onClick={addRoom}> Add Room</button>
-
+                <button className='update-button' onClick={addRoom}>Add Room</button>
             </div>
-
         </div>
-    )
+    );
+};
 
-}
 export default AddRoomPage;

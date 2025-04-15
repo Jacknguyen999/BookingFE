@@ -76,6 +76,9 @@ export default function SignUp(props) {
 
     const navigate = useNavigate();
 
+    // eslint-disable-next-line no-restricted-globals
+    const from = location.state?.from?.pathname || '/login';
+
     const validateInputs = () => {
         const email = document.getElementById('email');
         const password = document.getElementById('password');
@@ -142,6 +145,9 @@ export default function SignUp(props) {
                 });
 
                 setSuccessMessage('User registered successfully');
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('role', response.role);
+                navigate(from, {replace: true});
             }
         } catch (error) {
             setError(error.response?.data?.message || error.message);
@@ -239,6 +245,7 @@ export default function SignUp(props) {
                                 required
                                 fullWidth
                                 id="phoneNum"
+                                type='number'
                                 placeholder="0987654321JQK"
                                 error={phoneNumError}
                                 helperText={phoneNumErrorMessage}
