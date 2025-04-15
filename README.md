@@ -63,22 +63,27 @@ npm start
 
 The application will be available at `http://localhost:3000`
 
-### Available Scripts
+## 📦 Available Scripts
 
-- `npm start` - Runs the app in development mode
-- `npm test` - Launches the test runner
-- `npm run build` - Builds the app for production
-- `npm run eject` - Ejects from Create React App
+| Command           | Description                              |
+|------------------|------------------------------------------|
+| `npm start`       | Run the app in development mode          |
+| `npm test`        | Launch the test runner                   |
+| `npm run build`   | Build the app for production             |
+| `npm run eject`   | Ejects configuration (not reversible)    |
 
-## Project Structure
+---
+
+## 📁 Project Structure
+
 ```bash
 src/
+├── App.js                # Main app component
 ├── Component/
-│ ├── admin/ # Admin-specific components
-│ ├── auth/ # Authentication components
-│ ├── booking_rooms/ # Room booking components
-│ ├── common/ # Shared components
-│ ├── Home/ # Homepage components
-│ └── profile/ # User profile components
-├── Config/ # Configuration files
-└── App.js # Main application component
+│   ├── admin/            # Admin-specific views and tools
+│   ├── auth/             # Sign in / Sign up components
+│   ├── booking_rooms/    # Room listing and booking logic
+│   ├── common/           # Shared UI components (e.g., Header, Footer)
+│   ├── Home/             # Homepage and landing content
+│   └── profile/          # User profile and settings
+├── Config/               # Configuration files (e.g., Axios, Constants)
