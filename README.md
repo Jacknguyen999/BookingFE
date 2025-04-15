@@ -65,3 +65,14 @@ The application will be available at `http://localhost:3000`
 - `npm run eject` - Ejects from Create React App
 
 ## Project Structure
+
+src/
+├── Component/
+│ ├── admin/ # Admin-specific components
+│ ├── auth/ # Authentication components
+│ ├── booking_rooms/ # Room booking components
+│ ├── common/ # Shared components
+│ ├── Home/ # Homepage components
+│ └── profile/ # User profile components
+├── Config/ # Configuration files
+└── App.js # Main application component
