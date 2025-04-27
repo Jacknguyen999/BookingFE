@@ -15,8 +15,8 @@ import {
   Tab,
   Rating,
   Divider,
-  styled
-} from '@mui/material';
+  styled,
+} from "@mui/material";
 import {
   Pool,
   LocalParking,
@@ -27,31 +27,31 @@ import {
   Share,
   FavoriteBorder,
   Person,
-  ChildCare
-} from '@mui/icons-material';
+  ChildCare,
+} from "@mui/icons-material";
 import "react-datepicker/dist/react-datepicker.css";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   padding: theme.spacing(3),
-  maxWidth: '1200px',
+  maxWidth: "1200px",
 }));
 
 const ImageGallery = styled(Box)(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: '2fr 1fr',
-  gap: '4px',
+  display: "grid",
+  gridTemplateColumns: "2fr 1fr",
+  gap: "4px",
   marginBottom: theme.spacing(3),
-  '& .mainImage': {
-    height: '400px',
-    gridRow: '1 / span 2',
+  "& .mainImage": {
+    height: "400px",
+    gridRow: "1 / span 2",
   },
-  '& .secondaryImage': {
-    height: '198px',
+  "& .secondaryImage": {
+    height: "198px",
   },
-  [theme.breakpoints.down('sm')]: {
-    gridTemplateColumns: '1fr',
-    '& .mainImage, & .secondaryImage': {
-      height: '250px',
+  [theme.breakpoints.down("sm")]: {
+    gridTemplateColumns: "1fr",
+    "& .mainImage, & .secondaryImage": {
+      height: "250px",
     },
   },
 }));
@@ -250,7 +250,12 @@ const RoomDetailPage = () => {
     <>
       <StyledContainer>
         {/* Header Section */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
+        >
           <Box>
             <Box display="flex" alignItems="center" gap={1} mb={1}>
               <Rating value={4.5} readOnly precision={0.5} />
@@ -283,30 +288,39 @@ const RoomDetailPage = () => {
 
         {/* Image Gallery */}
         <ImageGallery>
+          {/* Main image - use first image from array or fallback */}
           <CardMedia
             component="img"
-            image={roomImageUrl}
+            image={
+              Array.isArray(roomImageUrl) && roomImageUrl.length > 0
+                ? roomImageUrl[0]
+                : "https://via.placeholder.com/600x400?text=No+Image+Available"
+            }
             alt={roomType}
             className="mainImage"
             sx={{ borderRadius: 1 }}
           />
-          {bookings?.slice(0, 2).map((_, index) => (
-            <CardMedia
-              key={index}
-              component="img"
-              image={roomImageUrl}
-              alt={`Room view ${index + 2}`}
-              className="secondaryImage"
-              sx={{ borderRadius: 1 }}
-            />
-          ))}
+          {/* Secondary images - use remaining images from array */}
+          {Array.isArray(roomImageUrl) &&
+            roomImageUrl
+              .slice(1, 3)
+              .map((imgUrl, index) => (
+                <CardMedia
+                  key={index}
+                  component="img"
+                  image={imgUrl}
+                  alt={`Room view ${index + 2}`}
+                  className="secondaryImage"
+                  sx={{ borderRadius: 1 }}
+                />
+              ))}
         </ImageGallery>
 
         {/* Navigation Tabs */}
         <Tabs
           value={tabValue}
           onChange={(_, newValue) => setTabValue(newValue)}
-          sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}
+          sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}
         >
           <Tab label="Overview" />
           <Tab label="Amenities" />
@@ -318,20 +332,44 @@ const RoomDetailPage = () => {
         {tabValue === 0 && (
           <Grid container spacing={4}>
             <Grid item xs={12} md={8}>
-              <Typography variant="h6" gutterBottom>Property Highlights</Typography>
+              <Typography variant="h6" gutterBottom>
+                Property Highlights
+              </Typography>
               <Grid container spacing={3}>
                 {[
-                  { icon: <Pool />, title: 'Swimming pool', desc: 'Infinity pool on rooftop' },
-                  { icon: <LocalParking />, title: 'Parking', desc: 'Free private parking' },
-                  { icon: <Restaurant />, title: 'Breakfast', desc: 'Excellent breakfast available' },
-                  { icon: <Kitchen />, title: 'Kitchen', desc: 'Fully equipped kitchen' },
-                  { icon: <Balcony />, title: 'Views', desc: 'City view from balcony' },
+                  {
+                    icon: <Pool />,
+                    title: "Swimming pool",
+                    desc: "Infinity pool on rooftop",
+                  },
+                  {
+                    icon: <LocalParking />,
+                    title: "Parking",
+                    desc: "Free private parking",
+                  },
+                  {
+                    icon: <Restaurant />,
+                    title: "Breakfast",
+                    desc: "Excellent breakfast available",
+                  },
+                  {
+                    icon: <Kitchen />,
+                    title: "Kitchen",
+                    desc: "Fully equipped kitchen",
+                  },
+                  {
+                    icon: <Balcony />,
+                    title: "Views",
+                    desc: "City view from balcony",
+                  },
                 ].map((item, index) => (
                   <Grid item xs={12} sm={6} key={index}>
                     <Box display="flex" gap={2}>
                       {item.icon}
                       <Box>
-                        <Typography variant="subtitle1">{item.title}</Typography>
+                        <Typography variant="subtitle1">
+                          {item.title}
+                        </Typography>
                         <Typography variant="body2" color="text.secondary">
                           {item.desc}
                         </Typography>
@@ -350,7 +388,10 @@ const RoomDetailPage = () => {
             <Grid item xs={12} md={4}>
               <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
                 <Typography variant="h5" gutterBottom>
-                  ${roomPrice} <Typography component="span" variant="body2">per night</Typography>
+                  ${roomPrice}{" "}
+                  <Typography component="span" variant="body2">
+                    per night
+                  </Typography>
                 </Typography>
 
                 <Box my={2}>
@@ -365,9 +406,15 @@ const RoomDetailPage = () => {
                             fullWidth
                             label="Nhận phòng"
                             size="small"
-                            error={checkInDate && checkOutDate && checkOutDate <= checkInDate}
+                            error={
+                              checkInDate &&
+                              checkOutDate &&
+                              checkOutDate <= checkInDate
+                            }
                             helperText={
-                              checkInDate && checkOutDate && checkOutDate <= checkInDate
+                              checkInDate &&
+                              checkOutDate &&
+                              checkOutDate <= checkInDate
                                 ? "Ngày nhận phòng không hợp lệ"
                                 : ""
                             }
@@ -381,15 +428,27 @@ const RoomDetailPage = () => {
                       <DatePicker
                         selected={checkOutDate}
                         onChange={handleCheckOutChange}
-                        minDate={checkInDate ? new Date(checkInDate.getTime() + 24 * 60 * 60 * 1000) : null} // Phải sau check-in ít nhất 1 ngày
+                        minDate={
+                          checkInDate
+                            ? new Date(
+                                checkInDate.getTime() + 24 * 60 * 60 * 1000
+                              )
+                            : null
+                        } // Phải sau check-in ít nhất 1 ngày
                         customInput={
                           <TextField
                             fullWidth
                             label="Trả phòng"
                             size="small"
-                            error={checkInDate && checkOutDate && checkOutDate <= checkInDate}
+                            error={
+                              checkInDate &&
+                              checkOutDate &&
+                              checkOutDate <= checkInDate
+                            }
                             helperText={
-                              checkInDate && checkOutDate && checkOutDate <= checkInDate
+                              checkInDate &&
+                              checkOutDate &&
+                              checkOutDate <= checkInDate
                                 ? "Ngày trả phòng phải sau ngày nhận phòng"
                                 : ""
                             }
@@ -414,7 +473,9 @@ const RoomDetailPage = () => {
                       error={!!adultError}
                       helperText={adultError || "Tuổi 13+"}
                       InputProps={{
-                        startAdornment: <Person sx={{ mr: 1, color: 'text.secondary' }} />,
+                        startAdornment: (
+                          <Person sx={{ mr: 1, color: "text.secondary" }} />
+                        ),
                       }}
                       inputProps={{
                         min: 1,
@@ -433,7 +494,9 @@ const RoomDetailPage = () => {
                       error={!!childrenError}
                       helperText={childrenError || "Tuổi 0-12"}
                       InputProps={{
-                        startAdornment: <ChildCare sx={{ mr: 1, color: 'text.secondary' }} />,
+                        startAdornment: (
+                          <ChildCare sx={{ mr: 1, color: "text.secondary" }} />
+                        ),
                       }}
                       inputProps={{
                         min: 0,
