@@ -89,6 +89,14 @@ export const ManageBookingPage = () => {
             <p>
               <strong>Total Guests:</strong> {booking.totalNumberOfGuests}
             </p>
+            <p>
+              <strong>Payment Status:</strong>{" "}
+              <span
+                className={`payment-status ${booking.paymentStatus?.toLowerCase()}`}
+              >
+                {booking.paymentStatus}
+              </span>
+            </p>
             <button
               className="edit-room-button"
               onClick={() =>
@@ -104,7 +112,7 @@ export const ManageBookingPage = () => {
       </div>
       <Pagination
         roomsPerPage={bookingsPerPage}
-        totalRooms={filterBookings.length}
+        totalRooms={filteredBooking.length}
         currentPage={currentPage}
         paginate={paginate}
       />
