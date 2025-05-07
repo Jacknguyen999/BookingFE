@@ -17,11 +17,11 @@ import {
 } from "@mui/material";
 import HotelIcon from "@mui/icons-material/Hotel";
 import RoomServiceIcon from "@mui/icons-material/RoomService";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ErrorIcon from "@mui/icons-material/Error";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import chatbotService from "../../Config/chatbotService";
 import chatbotTheme from "../../styles/chatbotTheme";
 
@@ -33,10 +33,13 @@ import ChatbotInput from "./chatbot/ChatbotInput";
 
 // Suggested questions for quick access
 const SUGGESTED_QUESTIONS = [
-  { text: "Room availability", icon: <HotelIcon fontSize="small" /> },
-  { text: "Hotel amenities", icon: <RoomServiceIcon fontSize="small" /> },
-  { text: "Special offers", icon: <LocalOfferIcon fontSize="small" /> },
-  { text: "Check-in times", icon: <EventAvailableIcon fontSize="small" /> },
+  { text: "List room types", icon: <HotelIcon fontSize="small" /> },
+  {
+    text: "Tell me about your rooms",
+    icon: <RoomServiceIcon fontSize="small" />,
+  },
+  // { text: "Special offers", icon: <LocalOfferIcon fontSize="small" /> },
+  // { text: "Check-in times", icon: <EventAvailableIcon fontSize="small" /> },
 ];
 
 const Chatbot = () => {
@@ -572,7 +575,7 @@ const Chatbot = () => {
                               : colors.botBubble,
                           color:
                             message.sender === "user"
-                              ? "#ffffff"
+                              ? colors.userBubbleText // Using theme value for user message text
                               : colors.botBubbleText,
                           boxShadow:
                             message.sender === "user"
@@ -592,22 +595,97 @@ const Chatbot = () => {
                               : "none",
                         }}
                       >
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            whiteSpace: "pre-wrap",
-                            fontWeight: message.sender === "user" ? 500 : 400, // Increased font weight for user messages
-                            lineHeight: 1.5,
-                            fontSize: "1rem", // Increased font size
-                            letterSpacing: "0.01em", // Added letter spacing for better readability
-                            textShadow:
-                              message.sender === "user"
-                                ? "0 1px 1px rgba(0,0,0,0.1)"
-                                : "none", // Added text shadow for user messages
-                          }}
-                        >
-                          {message.text}
-                        </Typography>
+                        {message.sender === "user" ? (
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              whiteSpace: "pre-wrap",
+                              fontWeight: 500, // Increased font weight for user messages
+                              lineHeight: 1.5,
+                              fontSize: "1rem", // Increased font size
+                              letterSpacing: "0.01em", // Added letter spacing for better readability
+                              textShadow: "0 1px 1px rgba(0,0,0,0.1)", // Added text shadow for user messages
+                            }}
+                          >
+                            {message.text}
+                          </Typography>
+                        ) : (
+                          <Box
+                            sx={{
+                              fontWeight: 400,
+                              lineHeight: 1.5,
+                              fontSize: "1rem",
+                              letterSpacing: "0.01em",
+                              "& p": { margin: "0.5em 0" },
+                              "& p:first-of-type": { marginTop: 0 },
+                              "& p:last-of-type": { marginBottom: 0 },
+                              "& h1, & h2, & h3, & h4, & h5, & h6": {
+                                margin: "0.5em 0",
+                                fontWeight: 600,
+                                lineHeight: 1.2,
+                              },
+                              "& h1": { fontSize: "1.5em" },
+                              "& h2": { fontSize: "1.3em" },
+                              "& h3": { fontSize: "1.2em" },
+                              "& h4, & h5, & h6": { fontSize: "1.1em" },
+                              "& ul, & ol": {
+                                paddingLeft: "1.5em",
+                                margin: "0.5em 0",
+                              },
+                              "& li": { margin: "0.25em 0" },
+                              "& a": {
+                                color: colors.primary,
+                                textDecoration: "underline",
+                              },
+                              "& code": {
+                                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                                padding: "0.1em 0.3em",
+                                borderRadius: "0.2em",
+                                fontFamily: "monospace",
+                              },
+                              "& pre": {
+                                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                                padding: "0.5em",
+                                borderRadius: "0.3em",
+                                overflow: "auto",
+                                margin: "0.5em 0",
+                              },
+                              "& pre code": {
+                                backgroundColor: "transparent",
+                                padding: 0,
+                              },
+                              "& blockquote": {
+                                borderLeft: `3px solid ${colors.mediumGray}`,
+                                paddingLeft: "0.5em",
+                                margin: "0.5em 0",
+                                color: colors.darkGray,
+                              },
+                              "& hr": {
+                                border: 0,
+                                borderTop: `1px solid ${colors.lightGray}`,
+                                margin: "0.5em 0",
+                              },
+                              "& table": {
+                                borderCollapse: "collapse",
+                                width: "100%",
+                                margin: "0.5em 0",
+                              },
+                              "& th, & td": {
+                                border: `1px solid ${colors.lightGray}`,
+                                padding: "0.3em 0.5em",
+                                textAlign: "left",
+                              },
+                              "& th": {
+                                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                                fontWeight: 600,
+                              },
+                            }}
+                          >
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {message.text}
+                            </ReactMarkdown>
+                          </Box>
+                        )}
                       </Paper>
                       <Typography
                         variant="caption"

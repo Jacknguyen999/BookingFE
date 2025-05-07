@@ -44,12 +44,11 @@ const chatbotTheme = {
     bubbles: {
       user: {
         background: "#2563eb",
-        text: "#ffffff",
+        text: "#ffffff", // White text for better contrast on blue background
       },
       bot: {
         background: "#ffffff",
-        // text: '#1e293b',
-        text: "#ffffff",
+        text: "#1e293b", // Dark gray text for better readability on white background
         border: "#dcdfe3",
       },
     },

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiService from "../../Config/ApiService";
-import previews from "../../dev/previews";
+import { useToast } from "../../contexts/ToastContext";
 
 export const EditBookingPage = () => {
   const navigate = useNavigate();
   const { bookingCode } = useParams();
+  const toast = useToast();
   const [bookingDetails, setBookingDetails] = useState(null); // State variable for booking details
   const [error, setError] = useState(null); // Track any errors
-  const [success, setSuccessMessage] = useState(null); // Track any errors
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -18,35 +18,36 @@ export const EditBookingPage = () => {
         );
         setBookingDetails(response.booking);
       } catch (e) {
-        setError(e.message);
+        const errorMessage = e.message;
+        setError(errorMessage);
+        toast.error(`Error loading booking details: ${errorMessage}`);
       }
     };
     fetchBookingDetails();
-  }, [bookingCode]);
+  }, [bookingCode, toast]);
 
   const achieveBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to Acheive this booking?")) {
+    if (!window.confirm("Are you sure you want to archive this booking?")) {
       return; // Do nothing if the user cancels
     }
     try {
       const response = await ApiService.cancelBooking(bookingId);
       if (response.statusCode === 200) {
-        setSuccessMessage("The booking was deleted");
+        toast.success("The booking was successfully archived");
         setTimeout(() => {
-          setSuccessMessage("");
           navigate("/admin/manage-bookings");
         }, 3000);
       }
     } catch (e) {
-      setError(error.response?.data?.message || error.message);
-      setTimeout(() => setError(""), 5000);
+      const errorMessage = e.response?.data?.message || e.message;
+      setError(errorMessage);
+      toast.error(`Error archiving booking: ${errorMessage}`);
     }
   };
   return (
     <div className="find-booking-page">
       <h2>Booking Detail</h2>
       {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
       {bookingDetails && (
         <div className="booking-details">
           <h3>Booking Details</h3>
@@ -86,10 +87,10 @@ export const EditBookingPage = () => {
             />
           </div>
           <button
-            className="acheive-booking"
+            className="archive-booking"
             onClick={() => achieveBooking(bookingDetails.id)}
           >
-            Achieve Booking
+            Archive Booking
           </button>
         </div>
       )}

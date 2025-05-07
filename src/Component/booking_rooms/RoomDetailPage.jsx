@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import ApiService from "../../Config/ApiService";
+import { useToast } from "../../contexts/ToastContext";
 import {
   Box,
   Container,
@@ -16,6 +17,7 @@ import {
   Rating,
   Divider,
   styled,
+  CircularProgress,
 } from "@mui/material";
 import {
   Pool,
@@ -59,6 +61,7 @@ const ImageGallery = styled(Box)(({ theme }) => ({
 const RoomDetailPage = () => {
   const navigate = useNavigate();
   const { roomId } = useParams();
+  const toast = useToast();
   const [roomDetails, setRoomDetails] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,31 +73,27 @@ const RoomDetailPage = () => {
   const [totalGuests, setTotalGuests] = useState(1);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [userId, setUserId] = useState("");
-  const [showMessage, setShowMessage] = useState(false);
-  const [confirmationCode, setConfirmationCode] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [tabValue, setTabValue] = useState(0);
   const [adultError, setAdultError] = useState("");
   const [childrenError, setChildrenError] = useState("");
 
-  const { roomType, roomPrice, roomImageUrl, roomDescription, bookings } =
+  const { roomType, roomPrice, roomImageUrl, roomDescription } =
     roomDetails || {};
 
   const handleConfirmBooking = async () => {
     if (!checkInDate || !checkOutDate) {
-      setErrorMessage("Vui lòng chọn ngày nhận và trả phòng");
-      setTimeout(() => setErrorMessage(""), 5000);
+      toast.error("Vui lòng chọn ngày nhận và trả phòng");
       return;
     }
 
     if (checkOutDate <= checkInDate) {
-      setErrorMessage("Ngày trả phòng phải sau ngày nhận phòng");
-      setTimeout(() => setErrorMessage(""), 5000);
+      toast.error("Ngày trả phòng phải sau ngày nhận phòng");
       return;
     }
 
     if (!numAdults || numAdults < 1) {
       setAdultError("Cần ít nhất 1 người lớn");
+      toast.error("Cần ít nhất 1 người lớn");
       return;
     } else {
       setAdultError("");
@@ -102,6 +101,7 @@ const RoomDetailPage = () => {
 
     if (numChildren < 0) {
       setChildrenError("Số trẻ em không được âm");
+      toast.error("Số trẻ em không được âm");
       return;
     } else {
       setChildrenError("");
@@ -124,12 +124,16 @@ const RoomDetailPage = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await ApiService.getRoomById(roomId);
-        setRoomDetails(response.room);
-        const userProfile = await ApiService.getCurrentUser();
+        const [roomResponse, userProfile] = await Promise.all([
+          ApiService.getRoomById(roomId),
+          ApiService.getCurrentUser(),
+        ]);
+        setRoomDetails(roomResponse.room);
         setUserId(userProfile.user.id);
       } catch (e) {
-        setError(e.response?.data?.message || e.message);
+        const errorMessage = e.response?.data?.message || e.message;
+        setError(errorMessage);
+        toast.error(`Error loading room details: ${errorMessage}`);
       } finally {
         setIsLoading(false);
       }
@@ -162,17 +166,17 @@ const RoomDetailPage = () => {
 
       const response = await ApiService.bookRoom(roomId, userId, booking);
       if (response.statusCode === 200) {
-        setConfirmationCode(response.bookingConfirmationCode);
-        setShowMessage(true);
+        toast.success(
+          `Đặt phòng thành công! Mã xác nhận: ${response.bookingConfirmationCode}`
+        );
 
+        // Redirect to profile page after a short delay
         setTimeout(() => {
-          setShowMessage(false);
           navigate("/profile");
-        }, 5000);
+        }, 3000);
       }
     } catch (e) {
-      setErrorMessage(e.response?.data?.message || e.message);
-      setTimeout(() => setErrorMessage(""), 5000);
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -182,16 +186,14 @@ const RoomDetailPage = () => {
     // Nếu ngày check-out hiện tại nhỏ hơn hoặc bằng ngày check-in mới, reset check-out
     if (date && checkOutDate && checkOutDate <= date) {
       setCheckOutDate(null);
-      setErrorMessage("Vui lòng chọn lại ngày trả phòng");
-      setTimeout(() => setErrorMessage(""), 5000);
+      toast.warning("Vui lòng chọn lại ngày trả phòng");
     }
   };
 
   // Hàm xử lý thay đổi ngày check-out
   const handleCheckOutChange = (date) => {
     if (date && checkInDate && date <= checkInDate) {
-      setErrorMessage("Ngày trả phòng phải sau ngày nhận phòng");
-      setTimeout(() => setErrorMessage(""), 5000);
+      toast.error("Ngày trả phòng phải sau ngày nhận phòng");
       setCheckOutDate(null);
     } else {
       setCheckOutDate(date);
@@ -204,12 +206,15 @@ const RoomDetailPage = () => {
     if (value === "") {
       setNumAdults("");
       setAdultError("Vui lòng nhập số người lớn");
+      toast.warning("Vui lòng nhập số người lớn");
     } else {
       const num = Number(value);
       if (num < 1) {
         setAdultError("Cần ít nhất 1 người lớn");
+        toast.error("Cần ít nhất 1 người lớn");
       } else if (num > 10) {
         setAdultError("Tối đa 10 người lớn");
+        toast.warning("Tối đa 10 người lớn");
       } else {
         setAdultError("");
       }
@@ -223,12 +228,15 @@ const RoomDetailPage = () => {
     if (value === "") {
       setNumChildren("");
       setChildrenError("Vui lòng nhập số trẻ em");
+      toast.warning("Vui lòng nhập số trẻ em");
     } else {
       const num = Number(value);
       if (num < 0) {
         setChildrenError("Số trẻ em không được âm");
+        toast.error("Số trẻ em không được âm");
       } else if (num > 6) {
         setChildrenError("Tối đa 6 trẻ em");
+        toast.warning("Tối đa 6 trẻ em");
       } else {
         setChildrenError("");
       }
@@ -237,13 +245,49 @@ const RoomDetailPage = () => {
   };
 
   if (isLoading) {
-    return <p className="loading">Đang tải thông tin phòng...</p>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="50vh"
+      >
+        <CircularProgress />
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Loading room details...
+        </Typography>
+      </Box>
+    );
   }
+
   if (error) {
-    return <p className="error">{error}</p>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="50vh"
+      >
+        <Typography variant="h6" color="error">
+          Error: {error}
+        </Typography>
+      </Box>
+    );
   }
+
   if (!roomDetails) {
-    return <p className="error">Không tìm thấy phòng.</p>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="50vh"
+      >
+        <Typography variant="h6" color="error">
+          Room not found.
+        </Typography>
+      </Box>
+    );
   }
 
   return (

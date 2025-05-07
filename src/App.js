@@ -12,7 +12,7 @@ import Chatbot from "./Component/common/Chatbot";
 import Homepage from "./Component/Home/homepage";
 import SignIn from "./Component/auth/SignIn";
 import SignUp from "./Component/auth/SignUp";
-import { AdminRoute, CustomerRoute } from "./Config/Authen";
+import ApiService from "./Config/ApiService";
 import ProfilePage from "./Component/profile/ProfilePage";
 import EditProfilePage from "./Component/profile/EditProfilePage";
 import AllRoomPage from "./Component/booking_rooms/AllRoomPage";
@@ -24,6 +24,26 @@ import AdminPage from "./Component/admin/AdminPage";
 import ManageBookingPage from "./Component/admin/ManageBookingPage";
 import EditBookingPage from "./Component/admin/EditBookingPage";
 import EditRoomPage from "./Component/admin/EditRoomPage";
+import { ToastProvider } from "./contexts/ToastContext";
+
+// Protected route components
+const CustomerProtectedRoute = ({ children }) => {
+  const location = useLocation();
+  return ApiService.isAuthenticated() ? (
+    children
+  ) : (
+    <Navigate to="/login" replace state={{ from: location }} />
+  );
+};
+
+const AdminProtectedRoute = ({ children }) => {
+  const location = useLocation();
+  return ApiService.isAdmin() ? (
+    children
+  ) : (
+    <Navigate to="/login" replace state={{ from: location }} />
+  );
+};
 
 function Layout() {
   const location = useLocation();
@@ -46,46 +66,82 @@ function Layout() {
           {/* Protected Routes */}
           <Route
             path="/room-details-book/:roomId"
-            element={<CustomerRoute element={<RoomDetailPage />} />}
+            element={
+              <CustomerProtectedRoute>
+                <RoomDetailPage />
+              </CustomerProtectedRoute>
+            }
           />
           <Route
             path="/profile"
-            element={<CustomerRoute element={<ProfilePage />} />}
+            element={
+              <CustomerProtectedRoute>
+                <ProfilePage />
+              </CustomerProtectedRoute>
+            }
           />
           <Route
             path="/edit-profile"
-            element={<CustomerRoute element={<EditProfilePage />} />}
+            element={
+              <CustomerProtectedRoute>
+                <EditProfilePage />
+              </CustomerProtectedRoute>
+            }
           />
 
           {/* Admin Routes */}
-
           <Route
             path="/admin"
-            element={<AdminRoute element={<AdminPage />} />}
+            element={
+              <AdminProtectedRoute>
+                <AdminPage />
+              </AdminProtectedRoute>
+            }
           />
 
           <Route
             path="/admin/manage-rooms"
-            element={<AdminRoute element={<ManageRoomPage />} />}
+            element={
+              <AdminProtectedRoute>
+                <ManageRoomPage />
+              </AdminProtectedRoute>
+            }
           />
 
           <Route
             path="/admin/add-room"
-            element={<AdminRoute element={<AddRoomPage />} />}
+            element={
+              <AdminProtectedRoute>
+                <AddRoomPage />
+              </AdminProtectedRoute>
+            }
           />
 
           <Route
             path="/admin/manage-bookings"
-            element={<AdminRoute element={<ManageBookingPage />} />}
+            element={
+              <AdminProtectedRoute>
+                <ManageBookingPage />
+              </AdminProtectedRoute>
+            }
           />
+
           <Route
             path="/admin/edit-booking/:bookingCode"
-            element={<AdminRoute element={<EditBookingPage />} />}
+            element={
+              <AdminProtectedRoute>
+                <EditBookingPage />
+              </AdminProtectedRoute>
+            }
           />
 
           <Route
             path="/admin/edit-room/:roomId"
-            element={<AdminRoute element={<EditRoomPage />} />}
+            element={
+              <AdminProtectedRoute>
+                <EditRoomPage />
+              </AdminProtectedRoute>
+            }
           />
 
           {/* Fallback Route */}
@@ -103,7 +159,9 @@ function Layout() {
 function App() {
   return (
     <BrowserRouter>
-      <Layout />
+      <ToastProvider>
+        <Layout />
+      </ToastProvider>
     </BrowserRouter>
   );
 }

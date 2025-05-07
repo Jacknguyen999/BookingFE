@@ -107,7 +107,7 @@ const ChatbotHeader = ({
                     borderRadius: "50%",
                     backgroundColor: theme.colors.accent.success,
                     display: "inline-block",
-                    boxShadow: "0 0 0 2px rgba(255,255,255,0.3)",
+                    boxShadow: "0 0 0 2px rgb(0, 150, 40)",
                   }}
                 />
                 Conversation active
