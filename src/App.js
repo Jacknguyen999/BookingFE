@@ -25,6 +25,9 @@ import ManageBookingPage from "./Component/admin/ManageBookingPage";
 import EditBookingPage from "./Component/admin/EditBookingPage";
 import EditRoomPage from "./Component/admin/EditRoomPage";
 import { ToastProvider } from "./contexts/ToastContext";
+import React from "react";
+import PaymentSuccess from "./Component/payment/PaymentSuccess";
+import PaymentFailed from "./Component/payment/PaymentFailed";
 
 // Protected route components
 const CustomerProtectedRoute = ({ children }) => {
@@ -56,12 +59,26 @@ function Layout() {
       {!isAuthPage && <Navbar />}
       <div className="content">
         <Routes>
+          {/* Root path - redirect to home if authenticated, login if not */}
+          <Route
+            path="/"
+            element={
+              ApiService.isAuthenticated() ? (
+                <Navigate to="/home" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
           {/* Public Routes */}
           <Route exact path="/home" element={<Homepage />} />
           <Route exact path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/rooms" element={<AllRoomPage />} />
           <Route path="/find-booking" element={<FindBookingPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/failed" element={<PaymentFailed />} />
 
           {/* Protected Routes */}
           <Route
@@ -144,14 +161,23 @@ function Layout() {
             }
           />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          {/* Fallback Route - redirect to home if authenticated, login if not */}
+          <Route
+            path="*"
+            element={
+              ApiService.isAuthenticated() ? (
+                <Navigate to="/home" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
         </Routes>
       </div>
       {/* Conditionally render Footer */}
       {!isAuthPage && <Footer />}
-      {/* Chatbot component - available on all pages */}
-      <Chatbot />
+      {/* Chatbot component - only show on non-auth pages */}
+      {!isAuthPage && <Chatbot />}
     </div>
   );
 }

@@ -5,30 +5,65 @@ export default class ApiService {
 
   static getHeader() {
     const token = localStorage.getItem("token");
-    return {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
+    if (!token) return { "Content-Type": "application/json" };
+
+    try {
+      // Check if token is expired
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const expirationTime = payload.exp * 1000; // Convert to milliseconds
+
+      // If token is expired, clear it and redirect to login
+      if (Date.now() >= expirationTime) {
+        this.logout();
+        return { "Content-Type": "application/json" };
+      }
+
+      return {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+    } catch (error) {
+      console.error("Error checking token:", error);
+      this.logout();
+      return { "Content-Type": "application/json" };
+    }
   }
 
   /** AUTH */
   // Register a new user
   static async registerUser(registration) {
-    const response = await axios.post(
-      `${this.BASE_URL}/auth/register`,
-      registration
-    );
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${this.BASE_URL}/auth/register`,
+        registration
+      );
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("role", response.data.role);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
   }
 
   // Login
-
   static async loginUser(loginDetails) {
-    const response = await axios.post(
-      `${this.BASE_URL}/auth/login`,
-      loginDetails
-    );
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${this.BASE_URL}/auth/login`,
+        loginDetails
+      );
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("role", response.data.role);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
   }
 
   /***USERS */
@@ -96,6 +131,13 @@ export default class ApiService {
     return result.data;
   }
 
+  static async getUnavailableDates(roomId) {
+    const result = await axios.get(
+      `${this.BASE_URL}/room/unavailable-dates/${roomId}`
+    );
+    return result.data;
+  }
+
   static async getAllAvailableRooms() {
     const result = await axios.get(
       `${this.BASE_URL}/rooms/all-available-rooms`
@@ -159,16 +201,38 @@ export default class ApiService {
   /**BOOKING */
 
   static async bookRoom(roomId, userId, booking) {
-    console.log("USER ID IS: " + userId);
-
-    const response = await axios.post(
-      `${this.BASE_URL}/bookings/book-room/${roomId}/${userId}`,
-      booking,
-      {
-        headers: this.getHeader(),
+    try {
+      console.log("USER ID IS: " + userId);
+      const response = await axios.post(
+        `${this.BASE_URL}/bookings/book-room/${roomId}/${userId}`,
+        booking,
+        {
+          headers: this.getHeader(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        throw {
+          response: {
+            data: error.response.data,
+            status: error.response.status,
+          },
+        };
+      } else if (error.request) {
+        // The request was made but no response was received
+        throw {
+          message: "Không thể kết nối đến server",
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        throw {
+          message: error.message || "Có lỗi xảy ra khi đặt phòng",
+        };
       }
-    );
-    return response.data;
+    }
   }
 
   static async getAllBookings() {
@@ -200,11 +264,32 @@ export default class ApiService {
   static logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    window.location.href = "/login"; // Force redirect to login
   }
 
   static isAuthenticated() {
     const token = localStorage.getItem("token");
-    return !!token;
+    if (!token) return false;
+
+    try {
+      // Check if token is expired
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const expirationTime = payload.exp * 1000; // Convert to milliseconds
+
+      // If token is expired, clear it
+      if (Date.now() >= expirationTime) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error checking token:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      return false;
+    }
   }
 
   static isAdmin() {

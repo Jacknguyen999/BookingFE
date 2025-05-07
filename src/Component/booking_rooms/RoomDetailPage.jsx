@@ -59,23 +59,26 @@ const ImageGallery = styled(Box)(({ theme }) => ({
 }));
 
 const RoomDetailPage = () => {
-  const navigate = useNavigate();
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const toast = useToast();
   const [roomDetails, setRoomDetails] = useState(null);
-  const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [checkInDate, setCheckInDate] = useState(null);
   const [checkOutDate, setCheckOutDate] = useState(null);
   const [numAdults, setNumAdults] = useState(1);
   const [numChildren, setNumChildren] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
   const [totalGuests, setTotalGuests] = useState(1);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [userId, setUserId] = useState("");
-  const [tabValue, setTabValue] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [adultError, setAdultError] = useState("");
   const [childrenError, setChildrenError] = useState("");
+  const [estimatedTotalPrice, setEstimatedTotalPrice] = useState(0);
+  const [actualTotalPrice, setActualTotalPrice] = useState(0);
+  const [unavailableDates, setUnavailableDates] = useState([]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   const { roomType, roomPrice, roomImageUrl, roomDescription } =
     roomDetails || {};
@@ -124,12 +127,17 @@ const RoomDetailPage = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [roomResponse, userProfile] = await Promise.all([
-          ApiService.getRoomById(roomId),
-          ApiService.getCurrentUser(),
-        ]);
+        const [roomResponse, userProfile, unavailableDatesResponse] =
+          await Promise.all([
+            ApiService.getRoomById(roomId),
+            ApiService.getCurrentUser(),
+            ApiService.getUnavailableDates(roomId),
+          ]);
         setRoomDetails(roomResponse.room);
         setUserId(userProfile.user.id);
+        setUnavailableDates(
+          unavailableDatesResponse.dates.map((date) => new Date(date))
+        );
       } catch (e) {
         const errorMessage = e.response?.data?.message || e.message;
         setError(errorMessage);
@@ -143,19 +151,48 @@ const RoomDetailPage = () => {
 
   const acceptBooking = async () => {
     try {
+      if (!checkInDate || !checkOutDate) {
+        toast.error("Vui lòng chọn ngày nhận và trả phòng");
+        return;
+      }
+
+      if (!numAdults || numAdults < 1) {
+        toast.error("Cần ít nhất 1 người lớn");
+        return;
+      }
+
       const startDate = new Date(checkInDate);
       const endDate = new Date(checkOutDate);
 
       const formattedCheckInDate = new Date(
-        startDate.getTime() - startDate.getTimezoneOffset() * 6000
+        startDate.getTime() - startDate.getTimezoneOffset() * 60000
       )
         .toISOString()
         .split("T")[0];
       const formattedCheckOutDate = new Date(
-        endDate.getTime() - startDate.getTimezoneOffset() * 6000
+        endDate.getTime() - endDate.getTimezoneOffset() * 60000
       )
         .toISOString()
         .split("T")[0];
+
+      // // Check room availability first
+      // const availabilityResponse =
+      //   await ApiService.getAvailableRoomsByDateAndType(
+      //     formattedCheckInDate,
+      //     formattedCheckOutDate,
+      //     roomDetails.roomType
+      //   );
+
+      // if (!availabilityResponse || availabilityResponse.statusCode !== 200) {
+      //   toast.error("Không thể kiểm tra tính khả dụng của phòng");
+      //   return;
+      // }
+
+      // const availableRooms = availabilityResponse.roomList || [];
+      // if (!availableRooms.some((room) => room.id === roomDetails.id)) {
+      //   toast.error("Phòng không còn trống trong khoảng thời gian này");
+      //   return;
+      // }
 
       const booking = {
         checkInDate: formattedCheckInDate,
@@ -175,8 +212,17 @@ const RoomDetailPage = () => {
           navigate("/profile");
         }, 3000);
       }
-    } catch (e) {
-      toast.error(e.response?.data?.message || e.message);
+    } catch (error) {
+      console.error("Booking error:", error);
+      let errorMessage = "Có lỗi xảy ra khi đặt phòng";
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage);
     }
   };
 
@@ -444,7 +490,8 @@ const RoomDetailPage = () => {
                       <DatePicker
                         selected={checkInDate}
                         onChange={handleCheckInChange}
-                        minDate={new Date()} // Không cho chọn ngày quá khứ
+                        minDate={new Date()}
+                        excludeDates={unavailableDates}
                         customInput={
                           <TextField
                             fullWidth
@@ -478,7 +525,8 @@ const RoomDetailPage = () => {
                                 checkInDate.getTime() + 24 * 60 * 60 * 1000
                               )
                             : null
-                        } // Phải sau check-in ít nhất 1 ngày
+                        }
+                        excludeDates={unavailableDates}
                         customInput={
                           <TextField
                             fullWidth
