@@ -29,6 +29,7 @@ import React from "react";
 import PaymentSuccess from "./Component/payment/PaymentSuccess";
 import PaymentFailed from "./Component/payment/PaymentFailed";
 
+
 // Protected route components
 const CustomerProtectedRoute = ({ children }) => {
   const location = useLocation();
@@ -79,6 +80,7 @@ function Layout() {
           <Route path="/find-booking" element={<FindBookingPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/failed" element={<PaymentFailed />} />
+          
 
           {/* Protected Routes */}
           <Route

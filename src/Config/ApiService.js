@@ -259,6 +259,17 @@ export default class ApiService {
     return result.data;
   }
 
+  static async confirmPayment(sessionId) {
+    const result = await axios.post(
+      `${this.BASE_URL}/payments/confirm/${sessionId}`,
+      {},
+      {
+        headers: this.getHeader(),
+      }
+    );
+    return result.data;
+  }
+
   /**AUTHENTICATION CHECKER */
 
   static logout() {

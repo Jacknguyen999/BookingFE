@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../Config/ApiService";
+import Pagination from "../common/Pagination";
+import "./ProfilePage.css";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [bookingsPerPage] = useState(3);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -32,6 +36,15 @@ const ProfilePage = () => {
     ApiService.logout();
     navigate("/home");
   };
+
+  // Pagination
+  const indexOfLastBooking = currentPage * bookingsPerPage;
+  const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
+  const currentBookings =
+    user?.bookings?.slice(indexOfFirstBooking, indexOfLastBooking) || [];
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="profile-page">
       {user && <h2> Hello , {user.name}</h2>}
@@ -61,7 +74,7 @@ const ProfilePage = () => {
         <h3>My Booking History </h3>
         <div className="booking-list">
           {user && user.bookings.length > 0 ? (
-            user.bookings.map((booking) => (
+            currentBookings.map((booking) => (
               <div key={booking.id} className="booking-item">
                 <p>
                   <strong>Booking Code:</strong>{" "}
@@ -79,6 +92,16 @@ const ProfilePage = () => {
                 <p>
                   <strong>Room Type:</strong> {booking.room.roomType}
                 </p>
+                <p>
+                  <strong>Payment Status:</strong>{" "}
+                  <span
+                    className={`payment-status ${
+                      booking.paymentStatus?.toLowerCase() || "pending"
+                    }`}
+                  >
+                    {booking.paymentStatus || "PENDING"}
+                  </span>
+                </p>
                 <img
                   src={
                     Array.isArray(booking.room.roomImageUrl) &&
@@ -95,6 +118,14 @@ const ProfilePage = () => {
             <p>No Booking found.</p>
           )}
         </div>
+        {user && user.bookings.length > 0 && (
+          <Pagination
+            roomsPerPage={bookingsPerPage}
+            totalRooms={user.bookings.length}
+            currentPage={currentPage}
+            paginate={paginate}
+          />
+        )}
       </div>
     </div>
   );

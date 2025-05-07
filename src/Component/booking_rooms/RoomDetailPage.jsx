@@ -175,25 +175,6 @@ const RoomDetailPage = () => {
         .toISOString()
         .split("T")[0];
 
-      // // Check room availability first
-      // const availabilityResponse =
-      //   await ApiService.getAvailableRoomsByDateAndType(
-      //     formattedCheckInDate,
-      //     formattedCheckOutDate,
-      //     roomDetails.roomType
-      //   );
-
-      // if (!availabilityResponse || availabilityResponse.statusCode !== 200) {
-      //   toast.error("Không thể kiểm tra tính khả dụng của phòng");
-      //   return;
-      // }
-
-      // const availableRooms = availabilityResponse.roomList || [];
-      // if (!availableRooms.some((room) => room.id === roomDetails.id)) {
-      //   toast.error("Phòng không còn trống trong khoảng thời gian này");
-      //   return;
-      // }
-
       const booking = {
         checkInDate: formattedCheckInDate,
         checkOutDate: formattedCheckOutDate,
@@ -202,15 +183,15 @@ const RoomDetailPage = () => {
       };
 
       const response = await ApiService.bookRoom(roomId, userId, booking);
-      if (response.statusCode === 200) {
-        toast.success(
-          `Đặt phòng thành công! Mã xác nhận: ${response.bookingConfirmationCode}`
-        );
+      console.log("Booking response:", response);
 
-        // Redirect to profile page after a short delay
-        setTimeout(() => {
-          navigate("/profile");
-        }, 3000);
+      if (response.success && response.paymentUrl) {
+        toast.success("Đang chuyển hướng đến trang thanh toán...");
+        window.location.href = response.paymentUrl;
+      } else {
+        toast.error(
+          response.message || "Có lỗi xảy ra khi tạo liên kết thanh toán"
+        );
       }
     } catch (error) {
       console.error("Booking error:", error);
@@ -221,7 +202,6 @@ const RoomDetailPage = () => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-
       toast.error(errorMessage);
     }
   };
