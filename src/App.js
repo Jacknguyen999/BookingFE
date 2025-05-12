@@ -29,8 +29,6 @@ import React from "react";
 import PaymentSuccess from "./Component/payment/PaymentSuccess";
 import PaymentFailed from "./Component/payment/PaymentFailed";
 
-
-// Protected route components
 const CustomerProtectedRoute = ({ children }) => {
   const location = useLocation();
   return ApiService.isAuthenticated() ? (
@@ -55,12 +53,10 @@ function Layout() {
     location.pathname === "/login" || location.pathname === "/register";
 
   return (
-    <div className="App">
-      {/* Conditionally render Navbar and Footer */}
+    <div className="flex flex-col min-h-screen bg-gray-50">
       {!isAuthPage && <Navbar />}
-      <div className="content">
+      <main className="flex-grow">
         <Routes>
-          {/* Root path - redirect to home if authenticated, login if not */}
           <Route
             path="/"
             element={
@@ -72,7 +68,6 @@ function Layout() {
             }
           />
 
-          {/* Public Routes */}
           <Route exact path="/home" element={<Homepage />} />
           <Route exact path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
@@ -80,9 +75,7 @@ function Layout() {
           <Route path="/find-booking" element={<FindBookingPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/failed" element={<PaymentFailed />} />
-          
 
-          {/* Protected Routes */}
           <Route
             path="/room-details-book/:roomId"
             element={
@@ -175,7 +168,7 @@ function Layout() {
             }
           />
         </Routes>
-      </div>
+      </main>
       {/* Conditionally render Footer */}
       {!isAuthPage && <Footer />}
       {/* Chatbot component - only show on non-auth pages */}
