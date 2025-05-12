@@ -4,6 +4,8 @@ A modern, responsive web application built with React for managing room bookings
 
 ---
 
+## MyWiki : [Link](https://deepwiki.com/Jacknguyen999/BookingFE/5.2-chatbot-system)
+
 ## 🚀 Features
 
 ### 👤 Authentication & Authorization
