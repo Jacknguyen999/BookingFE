@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const COUNTDOWN = 10000000000000; // Countdown in seconds
+const COUNTDOWN = 100000000; // Countdown in seconds
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -170,14 +170,12 @@ const PaymentSuccess = () => {
               </p>
             </div>
 
-            {/* Email notification */}
             <div className="border border-gray-100 rounded-lg p-3 bg-green-50 text-[#007F86]">
               <p className="text-center text-sm">Thanks for Order</p>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex flex-col space-y-3 p-4 pt-0">
           <div className="flex justify-between w-full gap-3">
             <button

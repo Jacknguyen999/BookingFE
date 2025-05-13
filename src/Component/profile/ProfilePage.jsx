@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../Config/ApiService";
 import Pagination from "../common/Pagination";
+import { useToast } from "../../contexts/ToastContext";
 import "./ProfilePage.css";
 
 const ProfilePage = () => {
@@ -10,6 +11,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [bookingsPerPage] = useState(3);
+  const toast = useToast();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -35,6 +37,79 @@ const ProfilePage = () => {
   const handleLogout = () => {
     ApiService.logout();
     navigate("/home");
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+      return; // Do nothing if the user cancels
+    }
+    try {
+      console.log("Attempting to cancel booking with ID:", bookingId);
+
+      const response = await ApiService.cancelBooking(bookingId);
+      console.log("Cancel booking response:", response);
+
+      if (response.statusCode === 200) {
+        toast.success("Your booking was successfully cancelled");
+
+        // Refresh user data to update the booking list
+        const userResponse = await ApiService.getCurrentUser();
+        const userPlusBooking = await ApiService.getUserBooking(
+          userResponse.user.id
+        );
+        setUser(userPlusBooking.user);
+      } else {
+        // Handle non-200 responses
+        toast.error(`Error: ${response.message || "Unknown error"}`);
+      }
+    } catch (e) {
+      console.error("Error cancelling booking:", e);
+      const errorMessage = e.response?.data?.message || e.message;
+      setError(errorMessage);
+      toast.error(`Error cancelling booking: ${errorMessage}`);
+    }
+  };
+
+  // Check if a booking can be cancelled based on payment status and check-in date
+  const canCancelBooking = (booking) => {
+    // Check payment status - only allow cancellation if NOT paid
+    const paymentStatus = (booking.paymentStatus || "").toUpperCase();
+    if (paymentStatus === "PAID") {
+      return false; // Cannot cancel paid bookings
+    }
+
+    // Check if check-in date is in the future
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to beginning of day for fair comparison
+
+    // Handle different date formats
+    let checkInDate;
+    try {
+      // Try to parse the date - handle YYYY-MM-DD format
+      if (typeof booking.checkInDate === "string") {
+        const parts = booking.checkInDate.split("-");
+        if (parts.length === 3) {
+          // Create date from parts and set to beginning of day
+          checkInDate = new Date(
+            parseInt(parts[0]),
+            parseInt(parts[1]) - 1,
+            parseInt(parts[2])
+          );
+          checkInDate.setHours(0, 0, 0, 0);
+        } else {
+          checkInDate = new Date(booking.checkInDate);
+          checkInDate.setHours(0, 0, 0, 0);
+        }
+      } else {
+        checkInDate = new Date(booking.checkInDate);
+        checkInDate.setHours(0, 0, 0, 0);
+      }
+
+      return checkInDate >= today; // Can only cancel future bookings
+    } catch (e) {
+      console.error("Error parsing date:", e);
+      return false; // If there's an error parsing the date, don't allow cancellation
+    }
   };
 
   // Pagination
@@ -72,6 +147,10 @@ const ProfilePage = () => {
       )}
       <div className="bookings-section">
         <h3>My Booking History </h3>
+        <p className="booking-info-message">
+          Note: You can only cancel bookings that are not yet paid and have
+          future check-in dates.
+        </p>
         <div className="booking-list">
           {user && user.bookings.length > 0 ? (
             currentBookings.map((booking) => (
@@ -112,6 +191,14 @@ const ProfilePage = () => {
                   alt="Room"
                   className="room-photo"
                 />
+                {canCancelBooking(booking) && (
+                  <button
+                    className="cancel-booking-button"
+                    onClick={() => handleCancelBooking(booking.id)}
+                  >
+                    Cancel Booking
+                  </button>
+                )}
               </div>
             ))
           ) : (
