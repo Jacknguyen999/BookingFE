@@ -7,7 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const COUNTDOWN = 100000000;
-console.log("This is first commit");
+
 
 
 
